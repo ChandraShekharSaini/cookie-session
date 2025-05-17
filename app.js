@@ -1,9 +1,19 @@
 import express from "express";
 import session from "express-session";
 import Cookies from "cookies";
+import mysql from "mysql2";
 const app = express();
 const PORT = 3500;
 const HOSTNAME = "127.0.0.1";
+
+let connection = mysql.createConnection({
+  password: "root",
+  database: "world",
+  host: "localhost",
+  user: "root",
+});
+
+connection.connect();
 
 app.use(
   session({
@@ -54,6 +64,19 @@ app.get("/get-cookie", (req, res, next) => {
   const userData = JSON.parse(data);
 
   res.send(`My name is ${userData.name} and age is ${userData.age}`);
+});
+
+app.get("/table-data", (req, res, next) => {
+  connection.query("SELECT * FROM countrylanguage", (error, result, fields) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+     res.json(result);
+  });
+
+ 
 });
 
 app.listen(PORT, HOSTNAME, () => {
